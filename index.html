@@ -1,0 +1,35 @@
+<script src="./webdnn.js"></script>
+<script>
+    function softmax(y) {
+        let sumexp = Math.exp(y[0]) + Math.exp(y[1]);
+
+        return [Math.exp(y[0]) / sumexp, Math.exp(y[1]) / sumexp]
+    }
+
+    async function main() {
+        let runner = await WebDNN.load('./output', {backendOrder: 'webgl'});
+
+        // [[x1, x2], [t1, t2]]
+        let data = [
+            [[-1, -1], [0, 1]],
+            [[-1, +1], [1, 0]],
+            [[+1, -1], [1, 0]],
+            [[+1, +1], [0, 1]]
+        ];
+
+        for (let [x, t] of data) {
+            runner.getInputViews()[0].set(x);
+            await runner.run();
+            let y = softmax(runner.getOutputViews()[0].toActual());
+
+            console.log('---------------------------');
+            console.log('x:', x);
+            console.log('t:', t);
+            console.log('y:', y);
+        }
+    }
+
+    main();
+</script>
+
+Open Debug Console.
